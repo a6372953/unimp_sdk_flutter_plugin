@@ -19,7 +19,7 @@ A new Flutter project.
   #头文件
   s.public_header_files = 'Classes/Headers/**/*.h'
   #.a文件
-  s.vendored_libraries = 'Core/Libs/*.a'
+  s.vendored_library = 'Core/Libs/*.a'
   #framework
   s.vendored_frameworks = 'Core/Libs/*.framework'
   s.dependency 'Flutter'
