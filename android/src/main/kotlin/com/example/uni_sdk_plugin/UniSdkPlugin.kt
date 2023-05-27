@@ -36,7 +36,7 @@ class UniSdkPlugin: FlutterPlugin, ActivityAware, MethodCallHandler {
   private lateinit var channel : MethodChannel
   private lateinit var ucontext: Context
   private lateinit var activity: Activity
-  private lateinit var currentUniMP
+  // private lateinit var currentUniMP
 
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     Log.d("uni sdk plugin","uni sdk plugin before init")
