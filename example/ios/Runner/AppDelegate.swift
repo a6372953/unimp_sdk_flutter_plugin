@@ -7,12 +7,12 @@ import Flutter
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    let options = NSMutableDictionary.init(dictionary: launchOptions ?? [:])
-              options.setValue(NSNumber.init(value:true), forKey: "debug")
-              DCUniMPSDKEngine.initSDKEnvironment(launchOptions: options as! [AnyHashable : Any]);
-              
-    GeneratedPluginRegistrant.register(with: self)
-    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+      let options = NSMutableDictionary.init(dictionary: launchOptions ?? [:])
+                    options.setValue(NSNumber.init(value:true), forKey: "debug")
+                    DCUniMPSDKEngine.initSDKEnvironment(launchOptions: options as! [AnyHashable : Any]);
+
+          GeneratedPluginRegistrant.register(with: self)
+          return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
     
     //app生命周期

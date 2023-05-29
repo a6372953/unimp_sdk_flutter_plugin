@@ -26,6 +26,7 @@ import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.net.URL
+import kotlin.concurrent.thread
 
 /** UniSdkPlugin */
 class UniSdkPlugin: FlutterPlugin, ActivityAware, MethodCallHandler {
@@ -36,6 +37,7 @@ class UniSdkPlugin: FlutterPlugin, ActivityAware, MethodCallHandler {
   private lateinit var channel : MethodChannel
   private lateinit var ucontext: Context
   private lateinit var activity: Activity
+  private var handler: Handler? = null
   // private lateinit var currentUniMP
 
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
@@ -85,6 +87,7 @@ class UniSdkPlugin: FlutterPlugin, ActivityAware, MethodCallHandler {
 
   override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
     channel.setMethodCallHandler(null)
+    handler?.removeCallbacksAndMessages(null)
   }
 
   override fun onAttachedToActivity(binding: ActivityPluginBinding) {
@@ -107,29 +110,43 @@ class UniSdkPlugin: FlutterPlugin, ActivityAware, MethodCallHandler {
     checkNeedPermissions()
 
     var filePath = "${ucontext.cacheDir.path}$appid.wgt"
+    if(DCUniMPSDK.getInstance().isExistsApp(appid)){
+      //小程序已经存在，打开小程序
+      Log.d("open unimp", "DCUniMPSDK.getInstance().openUniMP")
+      DCUniMPSDK.getInstance().openUniMP(ucontext, appid)
+      return
+    }
     if(!fileIsExists(filePath)){
-      var handler = object: Handler(Looper.getMainLooper()){
-        override fun handleMessage(msg: Message) {
-          super.handleMessage(msg)
-          when(msg.what){
-            1 -> {
-              openUniMP(appid, filePath, result)
-            } else -> {
+
+      Log.d("open unimp", "！fileIsExists")
+      //缓存中文件夹中没有小程序，下载小程序
+      if(handler == null){
+        handler = object: Handler(Looper.getMainLooper()){
+          override fun handleMessage(msg: Message) {
+            super.handleMessage(msg)
+            when(msg.what){
+              1 -> {
+                Log.d("open unimp", "$appid,$filePath")
+                openUniMP(appid, filePath, result)
+              } else -> {
               //
+            }
             }
           }
         }
       }
+
       var thread = Thread(){
         try{
           downloadFile(url, filePath)
-          handler.sendEmptyMessage(1)
+          handler?.sendEmptyMessage(1)
         }catch(e:Exception){
           Log.d("download error", e.toString())
         }
       }
       thread.start()
     }else{
+      //缓存文件夹中有小程序，打开小程序
       openUniMP(appid, filePath, result)
     }
 
