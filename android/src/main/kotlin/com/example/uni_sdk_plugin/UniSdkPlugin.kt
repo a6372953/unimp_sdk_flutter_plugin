@@ -28,7 +28,7 @@ import java.io.FileOutputStream
 import java.net.URL
 import kotlin.concurrent.thread
 
-/** UniSdkPlugin */
+/* UniSdkPlugin */
 class UniSdkPlugin: FlutterPlugin, ActivityAware, MethodCallHandler {
   /// The MethodChannel that will the communication between Flutter and native Android
   ///
