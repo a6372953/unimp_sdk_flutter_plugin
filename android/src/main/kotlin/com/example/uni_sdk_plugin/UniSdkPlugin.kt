@@ -95,15 +95,15 @@ class UniSdkPlugin: FlutterPlugin, ActivityAware, MethodCallHandler {
   }
 
   override fun onDetachedFromActivity() {
-    TODO("Not yet implemented")
+    // TODO("Not yet implemented")
   }
 
   override fun onDetachedFromActivityForConfigChanges() {
-    TODO("Not yet implemented")
+    // TODO("Not yet implemented")
   }
 
   override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
-    TODO("Not yet implemented")
+    // TODO("Not yet implemented")
   }
 
   fun beforeOpenUniMP(appid: String, url: String, @NonNull result: Result){
