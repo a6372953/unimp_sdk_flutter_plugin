@@ -4,7 +4,7 @@
  * @Author: niemengqiu
  * @Date: 2023-05-23 20:29:49
  * @LastEditors: niemengqiu
- * @LastEditTime: 2023-05-24 19:48:07
+ * @LastEditTime: 2023-06-02 14:57:53
  */
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
@@ -31,7 +31,7 @@ abstract class UniSdkPluginPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<String?> openUniMP(String appId, String url) {
+  Future<bool> openUniMP(String appId, String url) {
     throw UnimplementedError('openUniMP() has not been implemented.');
   }
 }

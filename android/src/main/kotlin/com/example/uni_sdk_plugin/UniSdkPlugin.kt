@@ -77,8 +77,6 @@ class UniSdkPlugin: FlutterPlugin, ActivityAware, MethodCallHandler {
       Log.d("unimp load", "$appId, $url")
       if(appId != null && url != null){
         beforeOpenUniMP(appId, url, result)
-      }else{
-        result.error("1", "appid或者url不能为空", "appid或者url不能为空")
       }
     } else {
       result.notImplemented()
@@ -107,13 +105,18 @@ class UniSdkPlugin: FlutterPlugin, ActivityAware, MethodCallHandler {
   }
 
   fun beforeOpenUniMP(appid: String, url: String, @NonNull result: Result){
-    checkNeedPermissions()
+//    checkNeedPermissions()
 
     var filePath = "${ucontext.cacheDir.path}$appid.wgt"
     if(DCUniMPSDK.getInstance().isExistsApp(appid)){
       //小程序已经存在，打开小程序
       Log.d("open unimp", "DCUniMPSDK.getInstance().openUniMP")
-      DCUniMPSDK.getInstance().openUniMP(ucontext, appid)
+      try {
+        DCUniMPSDK.getInstance().openUniMP(ucontext, appid)
+        result.success(true)
+      }catch (e: Exception){
+        result.success(false)
+      }
       return
     }
     if(!fileIsExists(filePath)){
@@ -138,9 +141,10 @@ class UniSdkPlugin: FlutterPlugin, ActivityAware, MethodCallHandler {
 
       var thread = Thread(){
         try{
-          downloadFile(url, filePath)
+          downloadFile(url, filePath, result)
           handler?.sendEmptyMessage(1)
         }catch(e:Exception){
+          result.success(false)
           Log.d("download error", e.toString())
         }
       }
@@ -162,14 +166,14 @@ class UniSdkPlugin: FlutterPlugin, ActivityAware, MethodCallHandler {
         try{
           //打开小程序
           DCUniMPSDK.getInstance().openUniMP(ucontext, appid)
+          result.success(true)
         }catch (e: Exception){
+          result.success(false)
           Log.d("unimp load","打开小程序失败,$e")
-          result.error("1", e.message, e.toString())
         }
       }else{
+        result.success(false)
         Log.d("unimp load", "释放wgt失败,code:$code,pargs:$pArgs")
-        //释放wgt失败
-        result.error("1", "小程序获取失败,code:$code,msg:$pArgs", "小程序获取失败,code:$code,msg:$pArgs")
       }
     }
   }
@@ -186,7 +190,7 @@ class UniSdkPlugin: FlutterPlugin, ActivityAware, MethodCallHandler {
     return true
   }
 
-  fun downloadFile(url: String,filePath: String){
+  fun downloadFile(url: String,filePath: String, @NonNull result: Result){
     var url = URL(url)
     var connection = url.openConnection()
     var input = BufferedInputStream(connection.getInputStream())
