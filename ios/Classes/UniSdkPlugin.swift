@@ -1,7 +1,7 @@
 import Flutter
 import UIKit
 
-public class UniSdkPlugin: NSObject, FlutterPlugin {
+public class UniSdkPlugin: NSObject, FlutterPlugin, DCUniMPSDKEngineDelegate {
             
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "uni_sdk_plugin", binaryMessenger: registrar.messenger())
@@ -17,6 +17,16 @@ public class UniSdkPlugin: NSObject, FlutterPlugin {
             beforeOpenUniMP(appid: arguments["appId"] as! String, url: arguments["url"] as! String, result: result)
         }else{
             result(FlutterMethodNotImplemented)
+        }
+    }
+    
+    public func onUniMPEventReceive(_ appid: String, event: String, data: Any, callback: @escaping DCUniMPKeepAliveCallback) {
+        //监听小程序发送事件
+        if(event == "getUserInfo"){
+            callback([
+                "uid": 123,
+                "token": "2333"
+            ], false)
         }
     }
     

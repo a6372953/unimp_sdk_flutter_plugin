@@ -22,6 +22,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import org.json.JSONObject
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -60,16 +61,18 @@ class UniSdkPlugin: FlutterPlugin, ActivityAware, MethodCallHandler {
     DCUniMPSDK.getInstance().initialize(ucontext, config){isSuccess ->
       Log.d("DCUniMPSDK init","DCUniMPSDK init finished isSuccess $isSuccess")
     }
-//    isInit = true
+
+    //监听uni小程序发送事件
+    DCUniMPSDK.getInstance().setOnUniMPEventCallBack{appid,event,data,callback ->
+      if(event == "getUserInfo") {
+        callback.invoke(mapOf("uid" to 1, "token" to "123445"))
+      }
+    }
   }
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
-//    Log.d("method channel", "plugin is init $isInit")
     Log.d("method channel", "flutter method channel call ${call.method}")
-//    if(!isInit){
-//      channel.invokeMethod("test", "12345")
-//      return
-//    }
+
     if (call.method == "openUniMP") {
       //打开uni小程序
       val appId: String? = call.argument("appId")
@@ -206,10 +209,10 @@ class UniSdkPlugin: FlutterPlugin, ActivityAware, MethodCallHandler {
     input.close()
   }
 
-  fun checkNeedPermissions(){
-    if(ContextCompat.checkSelfPermission(ucontext, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(ucontext, android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
-      //申请权限
-      ActivityCompat.requestPermissions(activity, arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE,android.Manifest.permission.READ_EXTERNAL_STORAGE),1)
-    }
-  }
+  // fun checkNeedPermissions(){
+  //   if(ContextCompat.checkSelfPermission(ucontext, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(ucontext, android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
+  //     //申请权限
+  //     ActivityCompat.requestPermissions(activity, arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE,android.Manifest.permission.READ_EXTERNAL_STORAGE),1)
+  //   }
+  // }
 }
