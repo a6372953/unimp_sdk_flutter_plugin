@@ -4,7 +4,7 @@
  * @Author: niemengqiu
  * @Date: 2023-05-23 20:29:49
  * @LastEditors: niemengqiu
- * @LastEditTime: 2023-06-05 17:21:26
+ * @LastEditTime: 2023-06-05 18:44:14
  */
 import 'dart:async';
 
@@ -41,8 +41,12 @@ class _MyAppState extends State<MyApp> {
   Future<void> openUniMP(BuildContext context) async {
     var flag = await UniSdkPlugin().openUniMP(
         "__UNI__EA8A35D",
-        "https://xlttoss.dongdongchat.com/qfile/apps/microapp/__UNI__EA8A35D-1.0.0.wgt",
-        "1.0.0");
+        "https://xlttoss.dongdongchat.com/qfile/apps/microapp/__UNI__EA8A35D-1.0.5.wgt",
+        "1.0.5");
+    // var flag = await UniSdkPlugin().openUniMP(
+    //     "__UNI__73C71A0",
+    //     "https://voice-images.oss-cn-beijing.aliyuncs.com/test/wgt/__UNI__73C71A0.wgt",
+    //     "1.0.0");
     if (!flag) {
       _messangerKey.currentState?.showSnackBar(
           SnackBar(content: Text("小程序打开失败"), backgroundColor: Colors.red));

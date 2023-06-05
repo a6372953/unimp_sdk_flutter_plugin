@@ -20,6 +20,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import org.json.JSONObject
 import java.io.BufferedInputStream
 import java.io.FileOutputStream
 import java.net.URL
@@ -61,6 +62,7 @@ class UniSdkPlugin: FlutterPlugin, ActivityAware, MethodCallHandler {
 
     //监听uni小程序发送事件
     DCUniMPSDK.getInstance().setOnUniMPEventCallBack{appid,event,data,callback ->
+      Log.d("setOnUniMPEventCallBack", "appid:$appid,event:$event,data:$data,callback:$callback")
       if(event == "getUserInfo") {
         getUserInfo(callback)
       }
@@ -219,8 +221,15 @@ class UniSdkPlugin: FlutterPlugin, ActivityAware, MethodCallHandler {
   fun getUserInfo(callback: DCUniMPJSCallback) {
     channel.invokeMethod("getUserInfo", null, object: MethodChannel.Result{
       override fun success(result: Any?) {
-        Log.d("getUserInfo", "success $result")
-        callback.invoke(mapOf("uid" to 1, "token" to "123445"))
+        var res = result as? HashMap<String, Any>
+        if(res != null) {
+          var token = res["token"]
+          Log.d("getUserInfo", "success $result")
+          Log.d("getUserInfo", "token $token")
+          callback.invoke(JSONObject("""{"uid":${res["uid"]}, "token":"${res["token"]}"}"""))
+        }else{
+          callback.invoke(null)
+        }
       }
       
       override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
