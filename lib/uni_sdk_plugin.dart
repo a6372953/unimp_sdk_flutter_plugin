@@ -4,8 +4,10 @@
  * @Author: niemengqiu
  * @Date: 2023-05-23 20:29:49
  * @LastEditors: niemengqiu
- * @LastEditTime: 2023-06-02 14:57:47
+ * @LastEditTime: 2023-06-05 13:12:55
  */
+import 'package:flutter/services.dart';
+
 import 'uni_sdk_plugin_platform_interface.dart';
 
 class UniSdkPlugin {
@@ -15,7 +17,17 @@ class UniSdkPlugin {
   }
   UniSdkPlugin._();
 
-  Future<bool> openUniMP(String appId, String url) {
-    return UniSdkPluginPlatform.instance.openUniMP(appId, url);
+  void setMethodCallHandler(
+      Future<dynamic> Function(MethodCall call)? handler) {
+    UniSdkPluginPlatform.instance.setMethodCallHandler(handler);
   }
+
+  Future<bool> openUniMP(String appId, String url, String version) {
+    return UniSdkPluginPlatform.instance.openUniMP(appId, url, version);
+  }
+}
+
+class NativeCallMethod {
+  /// 获取用户信息
+  static const String getUserInfo = "getUserInfo";
 }

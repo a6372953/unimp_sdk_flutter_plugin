@@ -4,8 +4,9 @@
  * @Author: niemengqiu
  * @Date: 2023-05-23 20:29:49
  * @LastEditors: niemengqiu
- * @LastEditTime: 2023-06-02 14:57:53
+ * @LastEditTime: 2023-06-05 09:50:25
  */
+import 'package:flutter/services.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'uni_sdk_plugin_method_channel.dart';
@@ -31,7 +32,13 @@ abstract class UniSdkPluginPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<bool> openUniMP(String appId, String url) {
+  Future<bool> openUniMP(String appId, String url, String version) {
     throw UnimplementedError('openUniMP() has not been implemented.');
+  }
+
+  void setMethodCallHandler(
+      Future<dynamic> Function(MethodCall call)? handler) async {
+    throw UnimplementedError(
+        'setMethodCallHandler() has not been implemented.');
   }
 }

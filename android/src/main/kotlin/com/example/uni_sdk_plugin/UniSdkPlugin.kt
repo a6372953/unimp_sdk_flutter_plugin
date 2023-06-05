@@ -2,17 +2,15 @@ package com.example.uni_sdk_plugin
 
 import android.app.Activity
 import android.content.Context
-import android.content.pm.PackageManager
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.util.Log
 import androidx.annotation.NonNull
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import io.dcloud.feature.sdk.DCSDKInitConfig
 import io.dcloud.feature.sdk.DCUniMPSDK
 import io.dcloud.feature.sdk.MenuActionSheetItem
+import io.dcloud.feature.unimp.DCUniMPJSCallback
 import io.dcloud.feature.unimp.config.UniMPReleaseConfiguration
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -22,12 +20,11 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
-import org.json.JSONObject
 import java.io.BufferedInputStream
-import java.io.File
 import java.io.FileOutputStream
 import java.net.URL
-import kotlin.concurrent.thread
+import java.nio.file.Files
+import kotlin.io.path.Path
 
 /* UniSdkPlugin */
 class UniSdkPlugin: FlutterPlugin, ActivityAware, MethodCallHandler {
@@ -65,7 +62,7 @@ class UniSdkPlugin: FlutterPlugin, ActivityAware, MethodCallHandler {
     //监听uni小程序发送事件
     DCUniMPSDK.getInstance().setOnUniMPEventCallBack{appid,event,data,callback ->
       if(event == "getUserInfo") {
-        callback.invoke(mapOf("uid" to 1, "token" to "123445"))
+        getUserInfo(callback)
       }
     }
   }
@@ -77,9 +74,10 @@ class UniSdkPlugin: FlutterPlugin, ActivityAware, MethodCallHandler {
       //打开uni小程序
       val appId: String? = call.argument("appId")
       val url: String? = call.argument("url")
-      Log.d("unimp load", "$appId, $url")
-      if(appId != null && url != null){
-        beforeOpenUniMP(appId, url, result)
+      val version: String? = call.argument("version")
+      Log.d("unimp load", "$appId, $url, $version")
+      if(appId != null && url != null && version != null){
+        beforeOpenUniMP(appId, url, version, result)
       }
     } else {
       result.notImplemented()
@@ -107,11 +105,12 @@ class UniSdkPlugin: FlutterPlugin, ActivityAware, MethodCallHandler {
     // TODO("Not yet implemented")
   }
 
-  fun beforeOpenUniMP(appid: String, url: String, @NonNull result: Result){
+  fun beforeOpenUniMP(appid: String, url: String, version: String, @NonNull result: Result){
 //    checkNeedPermissions()
 
-    var filePath = "${ucontext.cacheDir.path}$appid.wgt"
-    if(DCUniMPSDK.getInstance().isExistsApp(appid)){
+    var filePath = "${ucontext.cacheDir.path}${url.substring(url.lastIndexOf('/') + 1)}"
+    var versionInfo = DCUniMPSDK.getInstance().getAppVersionInfo(appid)
+    if(DCUniMPSDK.getInstance().isExistsApp(appid) && versionInfo["name"] == version){
       //小程序已经存在，打开小程序
       Log.d("open unimp", "DCUniMPSDK.getInstance().openUniMP")
       try {
@@ -122,9 +121,9 @@ class UniSdkPlugin: FlutterPlugin, ActivityAware, MethodCallHandler {
       }
       return
     }
-    if(!fileIsExists(filePath)){
+    // if(!fileIsExists(filePath)){
 
-      Log.d("open unimp", "！fileIsExists")
+//      Log.d("open unimp", "！fileIsExists")
       //缓存中文件夹中没有小程序，下载小程序
       if(handler == null){
         handler = object: Handler(Looper.getMainLooper()){
@@ -152,10 +151,10 @@ class UniSdkPlugin: FlutterPlugin, ActivityAware, MethodCallHandler {
         }
       }
       thread.start()
-    }else{
-      //缓存文件夹中有小程序，打开小程序
-      openUniMP(appid, filePath, result)
-    }
+    // }else{
+    //   //缓存文件夹中有小程序，打开小程序
+    //   openUniMP(appid, filePath, result)
+    // }
 
   }
 
@@ -166,6 +165,7 @@ class UniSdkPlugin: FlutterPlugin, ActivityAware, MethodCallHandler {
     DCUniMPSDK.getInstance().releaseWgtToRunPath(appid, uniMPReleaseConfiguration){ code, pArgs->
       if(code == 1){
         //释放wgt完成
+        Files.deleteIfExists(Path(filePath))
         try{
           //打开小程序
           DCUniMPSDK.getInstance().openUniMP(ucontext, appid)
@@ -181,17 +181,17 @@ class UniSdkPlugin: FlutterPlugin, ActivityAware, MethodCallHandler {
     }
   }
 
-  fun fileIsExists(filePath: String): Boolean {
-    try {
-      val f = File(filePath)
-      if (!f.exists()) {
-        return false
-      }
-    } catch (e: java.lang.Exception) {
-      return false
-    }
-    return true
-  }
+  // fun fileIsExists(filePath: String): Boolean {
+  //   try {
+  //     val f = File(filePath)
+  //     if (!f.exists()) {
+  //       return false
+  //     }
+  //   } catch (e: java.lang.Exception) {
+  //     return false
+  //   }
+  //   return true
+  // }
 
   fun downloadFile(url: String,filePath: String, @NonNull result: Result){
     var url = URL(url)
@@ -215,4 +215,21 @@ class UniSdkPlugin: FlutterPlugin, ActivityAware, MethodCallHandler {
   //     ActivityCompat.requestPermissions(activity, arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE,android.Manifest.permission.READ_EXTERNAL_STORAGE),1)
   //   }
   // }
+
+  fun getUserInfo(callback: DCUniMPJSCallback) {
+    channel.invokeMethod("getUserInfo", null, object: MethodChannel.Result{
+      override fun success(result: Any?) {
+        Log.d("getUserInfo", "success $result")
+        callback.invoke(mapOf("uid" to 1, "token" to "123445"))
+      }
+      
+      override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
+        Log.d("getUserInfo", "error $errorCode, $errorMessage, $errorDetails")
+      }
+
+      override fun notImplemented() {
+        Log.d("getUserInfo", "notImplemented")
+      }
+    })
+  }
 }

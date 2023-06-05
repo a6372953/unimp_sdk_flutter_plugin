@@ -4,7 +4,7 @@
  * @Author: niemengqiu
  * @Date: 2023-05-23 20:29:49
  * @LastEditors: niemengqiu
- * @LastEditTime: 2023-06-02 14:57:58
+ * @LastEditTime: 2023-06-05 09:50:44
  */
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -18,7 +18,13 @@ class MethodChannelUniSdkPlugin extends UniSdkPluginPlatform {
   final methodChannel = const MethodChannel('uni_sdk_plugin');
 
   MethodChannelUniSdkPlugin() {
-    methodChannel.setMethodCallHandler((call) async {});
+    // methodChannel.setMethodCallHandler((call) async {});
+  }
+
+  @override
+  void setMethodCallHandler(
+      Future<dynamic> Function(MethodCall call)? handler) async {
+    methodChannel.setMethodCallHandler(handler);
   }
 
   Future _methodChannelHandler(MethodCall call) async {
@@ -34,9 +40,9 @@ class MethodChannelUniSdkPlugin extends UniSdkPluginPlatform {
   }
 
   @override
-  Future<bool> openUniMP(String appId, String url) async {
-    return await methodChannel
-            .invokeMethod<bool>('openUniMP', {"appId": appId, "url": url}) ??
+  Future<bool> openUniMP(String appId, String url, String version) async {
+    return await methodChannel.invokeMethod<bool>(
+            'openUniMP', {"appId": appId, "url": url, "version": version}) ??
         false;
   }
 }
