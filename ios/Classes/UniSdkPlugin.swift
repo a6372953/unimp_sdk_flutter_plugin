@@ -30,6 +30,8 @@ public class UniSdkPlugin: NSObject, FlutterPlugin, DCUniMPSDKEngineDelegate {
                     let uid = result["uid"]
                     let token = result["token"]
                     callback(["uid": uid, "token":token], false)
+                }else{
+                    callback([], false)
                 }
             }
             
