@@ -17,7 +17,7 @@ A new Flutter project.
   # s.resources = 'Assets/Resources/*'
   s.resources = ["Assets/Resources/*.js", "Assets/Resources/*.ttf", "Assets/Resources/*.bundle"]
   #头文件
-  s.public_header_files = 'Classes/Headers/**/*.h'
+  s.public_header_files = 'Classes/Headers/**/*.h', 'Classes/*.h'
   #.a文件
   s.vendored_library = 'Core/Libs/*.a'
   #framework
