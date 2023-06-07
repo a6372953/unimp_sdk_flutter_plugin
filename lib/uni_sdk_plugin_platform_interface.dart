@@ -4,7 +4,7 @@
  * @Author: niemengqiu
  * @Date: 2023-05-23 20:29:49
  * @LastEditors: niemengqiu
- * @LastEditTime: 2023-06-05 09:50:25
+ * @LastEditTime: 2023-06-07 16:18:49
  */
 import 'package:flutter/services.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
@@ -32,7 +32,8 @@ abstract class UniSdkPluginPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<bool> openUniMP(String appId, String url, String version) {
+  Future<bool> openUniMP(String appId, String url, String version,
+      {String? scene}) {
     throw UnimplementedError('openUniMP() has not been implemented.');
   }
 

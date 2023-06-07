@@ -4,7 +4,7 @@
  * @Author: niemengqiu
  * @Date: 2023-05-23 20:29:49
  * @LastEditors: niemengqiu
- * @LastEditTime: 2023-06-05 09:50:44
+ * @LastEditTime: 2023-06-07 16:20:15
  */
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -40,9 +40,12 @@ class MethodChannelUniSdkPlugin extends UniSdkPluginPlatform {
   }
 
   @override
-  Future<bool> openUniMP(String appId, String url, String version) async {
-    return await methodChannel.invokeMethod<bool>(
-            'openUniMP', {"appId": appId, "url": url, "version": version}) ??
-        false;
+  Future<bool> openUniMP(String appId, String url, String version,
+      {String? scene}) async {
+    var data = {"appId": appId, "url": url, "version": version};
+    if (scene != null && scene.isNotEmpty) {
+      data["scene"] = scene;
+    }
+    return await methodChannel.invokeMethod<bool>('openUniMP', data) ?? false;
   }
 }

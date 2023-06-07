@@ -4,7 +4,7 @@
  * @Author: niemengqiu
  * @Date: 2023-05-23 20:29:49
  * @LastEditors: niemengqiu
- * @LastEditTime: 2023-06-05 13:12:55
+ * @LastEditTime: 2023-06-07 16:18:28
  */
 import 'package:flutter/services.dart';
 
@@ -22,8 +22,10 @@ class UniSdkPlugin {
     UniSdkPluginPlatform.instance.setMethodCallHandler(handler);
   }
 
-  Future<bool> openUniMP(String appId, String url, String version) {
-    return UniSdkPluginPlatform.instance.openUniMP(appId, url, version);
+  Future<bool> openUniMP(String appId, String url, String version,
+      {String? scene}) {
+    return UniSdkPluginPlatform.instance
+        .openUniMP(appId, url, version, scene: scene);
   }
 }
 

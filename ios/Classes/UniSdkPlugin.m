@@ -27,7 +27,7 @@
     NSLog(@"%@", call.method);
     if ([call.method isEqualToString:@"openUniMP"]) {
         NSDictionary *arguments = call.arguments;
-        [self beforeOpenUniMPWithAppId:arguments[@"appId"] url:arguments[@"url"] version:arguments[@"version"] result:result];
+        [self beforeOpenUniMPWithAppId:arguments[@"appId"] url:arguments[@"url"] version:arguments[@"version"] scene:arguments[@"scene"] result:result];
     } else {
         result(FlutterMethodNotImplemented);
     }
@@ -47,29 +47,34 @@
     }
 }
 
-- (void)beforeOpenUniMPWithAppId:(NSString *)appid url:(NSString *)url version:(NSString *)version result:(FlutterResult)result {
+- (void)beforeOpenUniMPWithAppId:(NSString *)appid url:(NSString *)url version:(NSString *)version scene:(NSString *)scene result:(FlutterResult)result {
     NSString *vnName = @"";
     NSDictionary *versionInfo = [DCUniMPSDKEngine getUniMPVersionInfoWithAppid:appid];
     if (versionInfo) {
         vnName = versionInfo[@"name"];
     }
     if ([DCUniMPSDKEngine isExistsUniMP:appid] && [vnName isEqualToString:version]) {
-        [self openUniMPWithAppId:appid result:result];
+        [self openUniMPWithAppId:appid scene:scene result:result];
     } else {
         NSString *filename = [[NSURL URLWithString:url] lastPathComponent];
         if (![self isFileExistsInDocuments:filename]) {
             __weak typeof(self) weakSelf = self;
             [self downloadFileAndSaveToDocumentsWithURL:[NSURL URLWithString:url] result:result completion:^{
-                [weakSelf installAndOpenUniMPWithAppId:appid url:url result:result];
+                [weakSelf installAndOpenUniMPWithAppId:appid scene:scene url:url result:result];
             }];
         }else{
-            [self installAndOpenUniMPWithAppId:appid url:url result:result];
+            [self installAndOpenUniMPWithAppId:appid scene:scene url:url result:result];
         }
     }
 }
 
-- (void)openUniMPWithAppId:(NSString *)appid result:(FlutterResult)result {
-    DCUniMPConfiguration *config = [self getUniMPConfiguration];
+- (void)openUniMPWithAppId:(NSString *)appid scene:(NSString *)scene result:(FlutterResult)result {
+    DCUniMPConfiguration *config = [[DCUniMPConfiguration alloc] init];
+    if(scene != nil){
+        config.extraData = @{@"scene": scene};
+    }
+    config.enableBackground = YES;
+    
     [DCUniMPSDKEngine openUniMP:appid configuration:config completed:^(DCUniMPInstance * _Nullable uniMPInstance, NSError * _Nullable error) {
         if (uniMPInstance) {
             NSLog(@"小程序打开成功");
@@ -81,7 +86,7 @@
     }];
 }
 
-- (void)installAndOpenUniMPWithAppId:(NSString *)appid url:(NSString *)url result:(FlutterResult)result {
+- (void)installAndOpenUniMPWithAppId:(NSString *)appid scene:(NSString *)scene url:(NSString *)url result:(FlutterResult)result {
     NSLog(@"install uni mp");
     NSString *docsDir = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0];
     NSString *filePath = [docsDir stringByAppendingPathComponent:[NSURL URLWithString:url].lastPathComponent];
@@ -92,17 +97,10 @@
     NSError *installError = nil;
     [DCUniMPSDKEngine installUniMPResourceWithAppid:appid resourceFilePath:filePath password:nil error:&installError];
     if (!installError) {
-        [weakSelf openUniMPWithAppId:appid result:result];
+        [weakSelf openUniMPWithAppId:appid scene:scene result:result];
     } else {
         NSLog(@"load unimp error");
     }
-}
-
-- (DCUniMPConfiguration *)getUniMPConfiguration {
-    DCUniMPConfiguration *config = [[DCUniMPConfiguration alloc] init];
-    config.extraData = @{@"arguments": @"hello"};
-    config.enableBackground = YES;
-    return config;
 }
 
 //判断文件是否存在

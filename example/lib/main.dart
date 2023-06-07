@@ -4,7 +4,7 @@
  * @Author: niemengqiu
  * @Date: 2023-05-23 20:29:49
  * @LastEditors: niemengqiu
- * @LastEditTime: 2023-06-05 18:44:14
+ * @LastEditTime: 2023-06-07 17:54:50
  */
 import 'dart:async';
 
@@ -38,11 +38,12 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  Future<void> openUniMP(BuildContext context) async {
+  Future<void> openUniMP(BuildContext context, {String? scene}) async {
     var flag = await UniSdkPlugin().openUniMP(
         "__UNI__EA8A35D",
-        "https://xlttoss.dongdongchat.com/qfile/apps/microapp/__UNI__EA8A35D-1.0.5.wgt",
-        "1.0.5");
+        "https://xlttoss.dongdongchat.com/qfile/apps/microapp/__UNI__EA8A35D-1.0.1.wgt",
+        "1.0.1",
+        scene: scene);
     // var flag = await UniSdkPlugin().openUniMP(
     //     "__UNI__73C71A0",
     //     "https://voice-images.oss-cn-beijing.aliyuncs.com/test/wgt/__UNI__73C71A0.wgt",
@@ -62,11 +63,27 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         body: Center(
-          child: TextButton(
-            onPressed: () {
-              openUniMP(context);
-            },
-            child: const Text('打开小程序'),
+          child: Column(
+            children: [
+              TextButton(
+                onPressed: () {
+                  openUniMP(context, scene: '{"123":"456"}');
+                },
+                child: const Text('打开小程序'),
+              ),
+              TextButton(
+                onPressed: () {
+                  openUniMP(context, scene: '{"123":"999"}');
+                },
+                child: const Text('打开小程序1'),
+              ),
+              TextButton(
+                onPressed: () {
+                  openUniMP(context);
+                },
+                child: const Text('打开小程序2'),
+              )
+            ],
           ),
         ),
       ),

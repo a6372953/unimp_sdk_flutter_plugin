@@ -11,6 +11,7 @@ import io.dcloud.feature.sdk.DCSDKInitConfig
 import io.dcloud.feature.sdk.DCUniMPSDK
 import io.dcloud.feature.sdk.MenuActionSheetItem
 import io.dcloud.feature.unimp.DCUniMPJSCallback
+import io.dcloud.feature.unimp.config.UniMPOpenConfiguration
 import io.dcloud.feature.unimp.config.UniMPReleaseConfiguration
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -77,9 +78,10 @@ class UniSdkPlugin: FlutterPlugin, ActivityAware, MethodCallHandler {
       val appId: String? = call.argument("appId")
       val url: String? = call.argument("url")
       val version: String? = call.argument("version")
+      var scene: String? = call.argument("scene")
       Log.d("unimp load", "$appId, $url, $version")
       if(appId != null && url != null && version != null){
-        beforeOpenUniMP(appId, url, version, result)
+        beforeOpenUniMP(appId, url, version, scene, result)
       }
     } else {
       result.notImplemented()
@@ -107,20 +109,14 @@ class UniSdkPlugin: FlutterPlugin, ActivityAware, MethodCallHandler {
     // TODO("Not yet implemented")
   }
 
-  fun beforeOpenUniMP(appid: String, url: String, version: String, @NonNull result: Result){
+  fun beforeOpenUniMP(appid: String, url: String, version: String, scene: String?, @NonNull result: Result){
 //    checkNeedPermissions()
 
     var filePath = "${ucontext.cacheDir.path}${url.substring(url.lastIndexOf('/') + 1)}"
     var versionInfo = DCUniMPSDK.getInstance().getAppVersionInfo(appid)
     if(DCUniMPSDK.getInstance().isExistsApp(appid) && versionInfo["name"] == version){
       //小程序已经存在，打开小程序
-      Log.d("open unimp", "DCUniMPSDK.getInstance().openUniMP")
-      try {
-        DCUniMPSDK.getInstance().openUniMP(ucontext, appid)
-        result.success(true)
-      }catch (e: Exception){
-        result.success(false)
-      }
+      openUniMP(appid, scene, result)
       return
     }
     // if(!fileIsExists(filePath)){
@@ -134,7 +130,7 @@ class UniSdkPlugin: FlutterPlugin, ActivityAware, MethodCallHandler {
             when(msg.what){
               1 -> {
                 Log.d("open unimp", "$appid,$filePath")
-                openUniMP(appid, filePath, result)
+                releaseAndOpenUniMP(appid, filePath, scene, result)
               } else -> {
               //
             }
@@ -155,12 +151,12 @@ class UniSdkPlugin: FlutterPlugin, ActivityAware, MethodCallHandler {
       thread.start()
     // }else{
     //   //缓存文件夹中有小程序，打开小程序
-    //   openUniMP(appid, filePath, result)
+    //   releaseAndOpenUniMP(appid, filePath, result)
     // }
 
   }
 
-  fun openUniMP(appid: String,filePath: String, @NonNull result: Result){
+  fun releaseAndOpenUniMP(appid: String,filePath: String, scene: String?, @NonNull result: Result){
     var uniMPReleaseConfiguration = UniMPReleaseConfiguration()
     uniMPReleaseConfiguration.wgtPath = filePath
 
@@ -168,18 +164,26 @@ class UniSdkPlugin: FlutterPlugin, ActivityAware, MethodCallHandler {
       if(code == 1){
         //释放wgt完成
         Files.deleteIfExists(Path(filePath))
-        try{
-          //打开小程序
-          DCUniMPSDK.getInstance().openUniMP(ucontext, appid)
-          result.success(true)
-        }catch (e: Exception){
-          result.success(false)
-          Log.d("unimp load","打开小程序失败,$e")
-        }
+        openUniMP(appid, scene, result);
       }else{
         result.success(false)
         Log.d("unimp load", "释放wgt失败,code:$code,pargs:$pArgs")
       }
+    }
+  }
+
+  fun openUniMP(appid: String, scene: String?, @NonNull result: Result){
+    var uniMPOpenConfiguration = UniMPOpenConfiguration()
+    if(scene != null) {
+      uniMPOpenConfiguration.extraData.put("scene", scene)
+    }
+    try{
+      //打开小程序
+      DCUniMPSDK.getInstance().openUniMP(ucontext, appid, uniMPOpenConfiguration)
+      result.success(true)
+    }catch (e: Exception){
+      result.success(false)
+      Log.d("unimp load","打开小程序失败,$e")
     }
   }
 
